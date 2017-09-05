@@ -1,9 +1,13 @@
+var express = require("express");
+
+var router = express.Router();
+
 // Import the model to use its database functions.
-var db = require("../models/");
+var burger = require("../models/");
 
 // Create all our routes and set up logic within those routes where required.
-app.get("/", function(req, res) {
-  db.Burger.all(function(data) {
+router.get("/", function(req, res) {
+  burger.findAll(function(data) {
     var hbsObject = {
       burgers: data
     };
@@ -12,8 +16,8 @@ app.get("/", function(req, res) {
   });
 });
 
-app.post("/", function(req, res) {
-  db.Burger.create([
+router.post("/", function(req, res) {
+  burger.create([
     "burger_name", "devoured"
   ], [
     req.body.burger_name, "0"
@@ -22,25 +26,25 @@ app.post("/", function(req, res) {
   });
 });
 
-app.put("/:id", function(req, res) {
+router.put("/:id", function(req, res) {
   var condition = "id = " + req.params.id;
 
   console.log("condition", condition);
 
-  db.Burger.update({
+  burger.update({
     devoured: req.body.devoured
   }, condition, function() {
     res.redirect("/");
   });
 });
 
-app.delete("/:id", function(req, res) {
+router.delete("/:id", function(req, res) {
   var condition = "id = " + req.params.id;
 
-  db.Burger.destroy(condition, function() {
+  burger.delete(condition, function() {
     res.redirect("/");
   });
 });
 
 // Export routes for server.js to use.
-//module.exports = router;
+module.exports = router;
