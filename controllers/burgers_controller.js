@@ -1,50 +1,53 @@
-var express = require("express");
+// Require packages and files
+let db = require('../models/');
 
-var router = express.Router();
+module.exports = (app) => {
+   // Read all from Database
+    app.get("/", (req,res) => {
+        db.Burger.findAll({}).then(function(data) {
+            var hbsObject = {
+               foods: data 
+            }
+            res.render("index", hbsObject);
+        });
+    });
 
-// Import the model to use its database functions.
-var burger = require("../models/");
+    //Post to database
+	app.post('/', (req,res) => {
+            console.log("This is the request", req.body);
+        db.Burger.create({
+            burger_name: req.body.burger_name,
+            devoured: 0
+        }).then((data) => {
+            console.log('Posted!!');
+            // Redirect to homepage
+            res.redirect('/');
+        });
+	});
 
-// Create all our routes and set up logic within those routes where required.
-router.get("/", function(req, res) {
-  burger.all(function(data) {
-    var hbsObject = {
-      burgers: data
-    };
-    console.log(hbsObject);
-    res.render("index", hbsObject);
-  });
-});
-
-router.post("/", function(req, res) {
-  burger.create([
-    "burger_name", "devoured"
-  ], [
-    req.body.burger_name, "0"
-  ], function() {
-    res.redirect("/");
-  });
-});
-
-router.put("/:id", function(req, res) {
-  var condition = "id = " + req.params.id;
-
-  console.log("condition", condition);
-
-  burger.update({
-    devoured: req.body.devoured
-  }, condition, function() {
-    res.redirect("/");
-  });
-});
-
-router.delete("/:id", function(req, res) {
-  var condition = "id = " + req.params.id;
-
-  burger.delete(condition, function() {
-    res.redirect("/");
-  });
-});
-
-// Export routes for server.js to use.
-module.exports = router;
+    //Moves to devoured
+     app.put('/:id', (req,res) => {
+        db.Burger.update({
+            devoured:1
+        },
+        {
+            where: {
+                id: req.params.id
+            }
+        }).then((data) => {
+            console.log("Devoured!!!");
+            res.redirect('/');
+        });
+     });
+    //Delete Devoured
+    app.delete('/:id', (req,res) => {
+        db.Burger.destroy({
+            where: {
+                id: req.params.id
+            }
+        }).then((data) => {
+            console.log("Destroyed!!!");
+            res.redirect('/');
+        });
+    }); 
+}
